@@ -15,18 +15,18 @@ console.log(process.env.NODE_ENV);
 
 connectDB();
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 // app.use(logger);
 
-// app.use(express.json());
+app.use(express.json());
 
 // app.use(cookieParser());
 
 app.use("/", express.static(path.join(__dirname, "public")));
 
 app.use("/", require("./routes/root"));
-
+app.use("/createUser", require("./routes/userCreateRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);
@@ -39,11 +39,11 @@ app.all("*", (req, res) => {
   }
 });
 
-mongoose.connection.once('open', () => {
-  console.log('Connected to MongoDB')
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
-})
+mongoose.connection.once("open", () => {
+  console.log("Connected to MongoDB");
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+});
 
-mongoose.connection.on('error', err => {
-  console.log(err)
-})
+mongoose.connection.on("error", (err) => {
+  console.log(err);
+});
