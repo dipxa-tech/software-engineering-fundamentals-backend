@@ -2,6 +2,20 @@ const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 
+const getAllUsers = asyncHandler(async (req, res) => {
+  try {
+    const users = await User.find().lean().exec();
+
+    if (!users?.length) {
+      return res.status(400).json({ message: "No users found " });
+    } else {
+      return res.json(users);
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 const createUser = asyncHandler(async (req, res) => {
   const {
     username,
@@ -63,6 +77,150 @@ const createUser = asyncHandler(async (req, res) => {
   }
 });
 
+const updateUser = asyncHandler(async (req, res) => {
+  const {
+    id,
+    username,
+    password,
+    email,
+    phone_number,
+    address,
+    postcode,
+    country,
+    roles,
+    profile,
+  } = req.body;
+
+  //checks fields
+  if (
+    !id ||
+    !username ||
+    !email ||
+    !phone_number ||
+    !address ||
+    !postcode ||
+    !country ||
+    !Array.isArray(roles) ||
+    !roles.length ||
+    !password ||
+    !profile 
+  ) {
+    return res.status(400).json({ message: "all fields are required" });
+  }
+
+  const user = await User.findById(id).exec();
+
+  if (!user) {
+    return res.status(400).json({ message: "user not found" });
+  }
+
+  //checks dups
+  // const duplicate = await User.findOne({ username }).lean().exec();
+  // if (duplicate && duplicate?._id.toString() !== id) {
+  //   return res.status(409).json({ message: "duplicate username" });
+  // }
+
+  user.username = username;
+  user.email = email;
+  user.phone_number = phone_number;
+  user.address = address;
+  user.postcode = postcode;
+  user.country = country;
+  user.password = password;
+  user.profile = profile;
+  user.roles = roles;
+
+  //testing later to see if it rehashes properly
+  if (password) {
+    user.password = await bcrypt.hash(password, 10);
+  }
+
+  if (Array.isArray(roles) || !roles.length) {
+    const updatedUser = await user.save();
+    return res.json({ message: `updated ${updatedUser.username}` });
+  }
+});
+
+const updateUserInformation = asyncHandler(async (req, res) => {
+  // Extract other user information from the request body
+  const {
+    id,
+    username,
+    email,
+    phone_number,
+    address,
+    postcode,
+    country,
+    roles,
+    profile,
+  } = req.body;
+
+  //checks fields
+  if (
+    !id ||
+    !username ||
+    !email ||
+    !phone_number ||
+    !address ||
+    !postcode ||
+    !country ||
+    !Array.isArray(roles) ||
+    !roles.length ||
+    !profile 
+  ) {
+    return res.status(400).json({ message: "all fields are required" });
+  }
+
+  const user = await User.findById(id).exec();
+
+  if (!user) {
+    return res.status(400).json({ message: "user not found" });
+  }
+
+  //checks dups
+  // const duplicate = await User.findOne({ username }).lean().exec();
+  // if (duplicate && duplicate?._id.toString() !== id) {
+  //   return res.status(409).json({ message: "duplicate username" });
+  // }
+
+  user.username = username;
+  user.email = email;
+  user.phone_number = phone_number;
+  user.address = address;
+  user.postcode = postcode;
+  user.country = country;
+  user.profile = profile;
+  user.roles = roles;
+
+  if (Array.isArray(roles) || !roles.length) {
+    const updatedUser = await user.save();
+    return res.json({ message: `updated ${updatedUser.username}` });
+  }
+});
+
+const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ message: "User ID required" });
+  }
+
+  const user = await User.findById(id).exec();
+
+  if (!user) {
+    return res.status(400).json({ message: "User does not exist" });
+  }
+
+  const result = await user.deleteOne();
+
+  return res.json(`User ${result.username} has been deleted.`);
+});
+
+
 module.exports = {
+  getAllUsers,
   createUser,
+  updateUser,
+  updateUserInformation,
+  deleteUser,
 };
