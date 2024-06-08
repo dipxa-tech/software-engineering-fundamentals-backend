@@ -1,9 +1,26 @@
 const mongoose = require("mongoose");
 
-const assetSchema = new mongoose.Schema({
-  genre: [{
+const maintenanceHistorySchema = new mongoose.Schema({
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+  status: {
     type: String,
-  }],
+    default: "Under Maintenance",
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+});
+
+const assetSchema = new mongoose.Schema({
+  genre: [
+    {
+      type: String,
+    },
+  ],
   date: {
     type: Date,
     default: Date.now,
@@ -16,7 +33,7 @@ const assetSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  //add another elementschema where we track the history of each assets
+  history: [maintenanceHistorySchema], // Embedded schema for maintenance history
 });
 
 const Asset = mongoose.model("Asset", assetSchema);

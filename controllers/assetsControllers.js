@@ -8,7 +8,7 @@ const getAllAssets = asyncHandler(async (req, res) => {
     if (!assets?.length) {
       return res.status(400).json({ message: "No assets found " });
     } else {
-      return res.json(concerts);
+      return res.json(assets);
     }
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" });
