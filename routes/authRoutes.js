@@ -6,10 +6,10 @@ const authController = require('../controllers/authsContollers')
 router.route('/')
     .post(authController.login)
 
-// router.route('/refresh')
-//     .get(authController.refresh)
+router.route('/refresh')
+    .get(authController.refresh)
 
-// router.route('/logout')
-//     .post(authController.logout)
+router.route('/logout')
+    .post(authController.logout)
 
 module.exports = router

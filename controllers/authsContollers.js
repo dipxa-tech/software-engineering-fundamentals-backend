@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 
 const login = asyncHandler(async (req, res) => {
+  //remember me is kept for future possible extensions
   const { username, password, rememberMe } = req.body;
 
   const refreshTokenExpiration = rememberMe ? "7d" : "1d";
@@ -25,8 +26,11 @@ const login = asyncHandler(async (req, res) => {
   const accessToken = jwt.sign(
     {
       UserInfo: {
+        _id: foundUser._id,
         username: foundUser.username,
+        phone_number: foundUser.phone_number,
         roles: foundUser.roles,
+        profile: foundUser.profile,
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -39,25 +43,16 @@ const login = asyncHandler(async (req, res) => {
     { expiresIn: refreshTokenExpiration }
   );
 
-  // res.cookie("jwt", refreshToken, {
-  //   httpOnly: false,
-  //   secure: false,
-  //   sameSite: "None",
-  //   maxAge: 7 * 24 * 60 * 60 * 1000,
-  // });
+  res.cookie("jwt", refreshToken, {
+    httpOnly: false,
+    secure: false,
+    sameSite: "None",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
 
   res.json({
     accessToken,
     refreshToken,
-    userData: {
-      _id: foundUser._id,
-      username: foundUser.username,
-      phone_number: foundUser.phone_number,
-      roles: foundUser.roles,
-      profile: foundUser.profile,
-      ticket: foundUser.ticket,
-      password: foundUser.password
-    },
   });
 });
 
@@ -83,8 +78,11 @@ const refresh = (req, res) => {
       const accessToken = jwt.sign(
         {
           UserInfo: {
+            _id: foundUser._id,
             username: foundUser.username,
+            phone_number: foundUser.phone_number,
             roles: foundUser.roles,
+            profile: foundUser.profile,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,
@@ -93,14 +91,6 @@ const refresh = (req, res) => {
 
       res.json({
         accessToken,
-        userData: {
-          _id: foundUser._id,
-          username: foundUser.username,
-          phone_number: foundUser.phone_number,
-          roles: foundUser.roles,
-          profile: foundUser.profile,
-          ticket: foundUser.ticket,
-        },
       });
     })
   );

@@ -5,6 +5,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  fullname: {
+    type: String,
+    required: true,
+  },
   password: {
     type: String,
     required: true,
@@ -27,14 +31,6 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   address: {
-    type: String,
-    required: true
-  },
-  postcode: {
-    type: String,
-    required: true
-  },
-  country: {
     type: String,
     required: true
   },

@@ -16,17 +16,32 @@ const getAllUsers = asyncHandler(async (req, res) => {
   }
 });
 
+const getUserById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ message: "User ID required" });
+  }
+
+  const user = await User.findById(id)
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  return res.json(user);
+});
+
 const createUser = asyncHandler(async (req, res) => {
   const {
     username,
+    fullname,
     password,
     email,
     phone_number,
     roles,
     profile,
     address,
-    postcode,
-    country,
   } = req.body;
 
   //this helps confirm fields
@@ -39,8 +54,7 @@ const createUser = asyncHandler(async (req, res) => {
     !email ||
     !phone_number ||
     !address ||
-    !postcode ||
-    !country
+    !fullname
   ) {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -63,8 +77,7 @@ const createUser = asyncHandler(async (req, res) => {
     email,
     phone_number,
     address,
-    postcode,
-    country,
+    fullname
   };
 
   //storing new user
@@ -85,8 +98,7 @@ const updateUser = asyncHandler(async (req, res) => {
     email,
     phone_number,
     address,
-    postcode,
-    country,
+    fullname,
     roles,
     profile,
   } = req.body;
@@ -98,8 +110,7 @@ const updateUser = asyncHandler(async (req, res) => {
     !email ||
     !phone_number ||
     !address ||
-    !postcode ||
-    !country ||
+    !fullname ||
     !Array.isArray(roles) ||
     !roles.length ||
     !password ||
@@ -124,8 +135,7 @@ const updateUser = asyncHandler(async (req, res) => {
   user.email = email;
   user.phone_number = phone_number;
   user.address = address;
-  user.postcode = postcode;
-  user.country = country;
+  user.fullname = fullname;
   user.password = password;
   user.profile = profile;
   user.roles = roles;
@@ -149,8 +159,7 @@ const updateUserInformation = asyncHandler(async (req, res) => {
     email,
     phone_number,
     address,
-    postcode,
-    country,
+    fullname,
     roles,
     profile,
   } = req.body;
@@ -162,8 +171,7 @@ const updateUserInformation = asyncHandler(async (req, res) => {
     !email ||
     !phone_number ||
     !address ||
-    !postcode ||
-    !country ||
+    !fullname ||
     !Array.isArray(roles) ||
     !roles.length ||
     !profile 
@@ -187,8 +195,7 @@ const updateUserInformation = asyncHandler(async (req, res) => {
   user.email = email;
   user.phone_number = phone_number;
   user.address = address;
-  user.postcode = postcode;
-  user.country = country;
+  user.fullname = fullname;
   user.profile = profile;
   user.roles = roles;
 
@@ -223,4 +230,5 @@ module.exports = {
   updateUser,
   updateUserInformation,
   deleteUser,
+  getUserById
 };
