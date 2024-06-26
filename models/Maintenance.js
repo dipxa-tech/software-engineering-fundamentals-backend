@@ -1,22 +1,22 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+const { v4: uuidv4 } = require('uuid');
 
-const maintenanceSchema = new mongoose.Schema({
-  asset: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Asset', 
-    required: true
+const maintenanceSchema = new Schema({
+  maintenanceId: {
+    type: String,
+    default: uuidv4, // Automatically generate a UUID
+    unique: true
   },
-  // Changed to a map to allow flexible key-value pairs
   maintenanceDetails: {
-    type: Map,  
-    of: String
+    type: String,
+    required: true,
+    enum: ['Cleaning', 'Repair', 'Inspection', 'Replacement'] // Example maintenance details
   },
-  maintenanceDate: {
+  dateCreated: {
     type: Date,
     default: Date.now
   }
 });
 
-const Maintenance = mongoose.model("Maintenance", maintenanceSchema);
-
-module.exports = Maintenance;
+module.exports = mongoose.model('Maintenance', maintenanceSchema);

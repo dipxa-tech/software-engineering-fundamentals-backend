@@ -1,56 +1,70 @@
+const asyncHandler = require('express-async-handler');
 const Maintenance = require('../models/Maintenance');
-const Asset = require('../models/Asset');
 
-const createMaintenance = async (req, res) => {
-  try {
-    const { assetId, description } = req.body;
+const createMaintenanceRecord = asyncHandler(async (req, res) => {
+  const { maintenanceDetails } = req.body;
 
-    // Ensure the asset exists
-    const asset = await Asset.findById(assetId);
-    if (!asset) {
-      return res.status(404).send({ error: "Asset not found" });
-    }
-
-    // Create new maintenance record
-    const newMaintenance = new Maintenance({
-      asset: assetId,
-      maintenanceDetails: {
-        genre: asset.genre.join(', '),
-        description: asset.description,
-        date: asset.date.toISOString().split("T")[0]
-      }
-    });
-
-    await newMaintenance.save();
-
-    // Update asset's maintenance history
-    asset.history.push({ 
-      date: new Date(), 
-      status: "Under Maintenance",
-      description 
-    });
-
-    await asset.save();
-
-    res.status(201).send(newMaintenance);
-  } catch (error) {
-    res.status(400).send({ error: error.message });
+  if (!maintenanceDetails) {
+    return res.status(400).json({ message: 'Maintenance details are required' });
   }
-};
 
-const getMaintenanceById = async (req, res) => {
-  try {
-    const maintenance = await Maintenance.findById(req.params.id).populate('asset');
-    if (!maintenance) {
-      return res.status(404).send({ error: "Maintenance record not found" });
-    }
-    res.send(maintenance);
-  } catch (error) {
-    res.status(400).send({ error: error.message });
+  const newMaintenance = new Maintenance({
+    maintenanceDetails
+  });
+
+  const savedMaintenance = await newMaintenance.save();
+  res.status(201).json(savedMaintenance);
+});
+
+const getAllMaintenanceRecords = asyncHandler(async (req, res) => {
+  const maintenanceRecords = await Maintenance.find();
+  res.status(200).json(maintenanceRecords);
+});
+
+const getMaintenanceRecordById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const maintenanceRecord = await Maintenance.findById(id);
+  if (!maintenanceRecord) {
+    return res.status(404).json({ message: 'Maintenance record not found' });
   }
-};
+  res.status(200).json(maintenanceRecord);
+});
+
+const updateMaintenanceRecord = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { maintenanceDetails } = req.body;
+
+  if (!maintenanceDetails) {
+    return res.status(400).json({ message: 'Maintenance details are required' });
+  }
+
+  const maintenanceRecord = await Maintenance.findById(id);
+  if (!maintenanceRecord) {
+    return res.status(404).json({ message: 'Maintenance record not found' });
+  }
+
+  maintenanceRecord.maintenanceDetails = maintenanceDetails;
+
+  const updatedMaintenance = await maintenanceRecord.save();
+  res.status(200).json(updatedMaintenance);
+});
+
+const deleteMaintenanceRecord = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const maintenanceRecord = await Maintenance.findById(id);
+  if (!maintenanceRecord) {
+    return res.status(404).json({ message: 'Maintenance record not found' });
+  }
+
+  await maintenanceRecord.remove();
+  res.status(200).json({ message: 'Maintenance record deleted' });
+});
+
 
 module.exports = {
-  createMaintenance,
-  getMaintenanceById,
+  createMaintenanceRecord,
+  getAllMaintenanceRecords,
+  getMaintenanceRecordById,
+  updateMaintenanceRecord,
+  deleteMaintenanceRecord
 };

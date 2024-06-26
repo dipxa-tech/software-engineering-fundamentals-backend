@@ -4,56 +4,42 @@ const asyncHandler = require("express-async-handler");
 const getAllAssets = asyncHandler(async (req, res) => {
   try {
     const assets = await Asset.find().lean();
-
     if (!assets?.length) {
-      return res.status(400).json({ message: "No assets found " });
-    } else {
-      return res.json(assets);
+      return res.status(400).json({ message: "No assets found" });
     }
+    return res.json(assets);
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-const getAssetsById = asyncHandler(async (req, res) => {
+const getAssetById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   if (!id) {
     return res.status(400).json({ message: "Asset ID required" });
   }
 
-  const assets = await Asset.findById(id).lean().exec();
-
-  if (!assets) {
+  const asset = await Asset.findById(id).lean().exec();
+  if (!asset) {
     return res.status(404).json({ message: "Asset not found" });
   }
 
-  return res.json(assets);
+  return res.json(asset);
 });
 
-const createAssets = asyncHandler(async (req, res) => {
-  const {
-    genre,
-    date,
-    description,
-  } = req.body;
+const createAsset = asyncHandler(async (req, res) => {
+  const { genre, date, description } = req.body;
 
-  if (
-    !date ||
-    !genre ||
-    !description 
-  ) {
+  if (!date || !genre || !description) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    const assets = await Asset.create({
-      date,
-      genre,
-      description,
-    });
+    const assetObject = { date, genre, description };
+    const newAsset = await Asset.create(assetObject);
 
-    return res.status(201).json({ message: `New asset created` });
+    return res.status(201).json({ message: "New asset created" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -61,61 +47,46 @@ const createAssets = asyncHandler(async (req, res) => {
 });
 
 const updateAsset = asyncHandler(async (req, res) => {
-  const {
-    id,
-    date,
-    genre,
-    description,
-  } = req.body;
+  const { id } = req.params;
+  const { date, genre, description } = req.body;
 
-  // checks fields
-  if (
-    !id ||
-    !date ||
-    !description ||
-    !genre
-  ) {
-    return res.status(400).json({ message: "all fields are required" });
+  if (!date || !genre || !description) {
+    return res.status(400).json({ message: "All fields are required" });
   }
 
-  const assets = await Asset.findById(id).exec();
-
-  if (!assets) {
-    return res.status(400).json({ message: "Asset not found" });
+  const asset = await Asset.findById(id).exec();
+  if (!asset) {
+    return res.status(404).json({ message: "Asset not found" });
   }
 
-  concert.date = date;
-  concert.description = description;
-  concert.genre = genre;
+  asset.date = date;
+  asset.genre = genre;
+  asset.description = description;
 
-  // Save the updated asset
-  const updatedAsset = await assets.save();
-
-  return res.json({ message: `updated ${updatedAsset.genre}` });
+  const updatedAsset = await asset.save();
+  return res.json({ message: `Updated asset ${updatedAsset.genre}` });
 });
 
 const deleteAsset = asyncHandler(async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
 
   if (!id) {
     return res.status(400).json({ message: "Asset ID required" });
   }
 
   const asset = await Asset.findById(id).exec();
-
-  if (!concert) {
-    return res.status(400).json({ message: "Asset does not exist" });
+  if (!asset) {
+    return res.status(404).json({ message: "Asset not found" });
   }
 
-  const result = await concert.deleteOne();
-
-  return res.json(`User ${result.genre} has been deleted.`);
+  const result = await asset.deleteOne();
+  return res.json({ message: `Asset ${result.genre} has been deleted.` });
 });
 
 module.exports = {
-  createAssets,
-  deleteAsset,
   getAllAssets,
-  getAssetsById,
-  updateAsset
+  getAssetById,
+  createAsset,
+  updateAsset,
+  deleteAsset,
 };

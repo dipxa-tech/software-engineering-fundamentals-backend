@@ -1,16 +1,17 @@
-const express = require('express')
-const router = express.Router()
-const assetsControllers = require('../controllers/assetsControllers')
-// const verifyJWT = require('../middleware/verifyJWT')
+const express = require('express');
+const router = express.Router();
+const assetControllers = require('../controllers/assetsControllers');
+// const verifyJWT = require('../middleware/verifyJWT');
 
-// router.use(verifyJWT)
+// router.use(verifyJWT);
 
 router.route('/')
-    .get(assetsControllers.getAllAssets)
-    .post(assetsControllers.createAssets)
-    .patch(assetsControllers.updateAsset)
-    .delete(assetsControllers.deleteAsset)
+    .get(assetControllers.getAllAssets)
+    .post(assetControllers.createAsset);
 
-router.get('/:id', assetsControllers.getAssetsById)
+router.route('/:id')
+    .get(assetControllers.getAssetById)
+    .patch(assetControllers.updateAsset)
+    .delete(assetControllers.deleteAsset);
 
-module.exports = router
+module.exports = router;
