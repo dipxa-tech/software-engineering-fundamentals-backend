@@ -91,8 +91,8 @@ const createUser = asyncHandler(async (req, res) => {
 });
 
 const updateUser = asyncHandler(async (req, res) => {
-  const { id } = req.params;
   const {
+    id,
     username,
     password,
     email,
@@ -103,8 +103,9 @@ const updateUser = asyncHandler(async (req, res) => {
     profile,
   } = req.body;
 
-  // Checks fields
+  //checks fields
   if (
+    !id ||
     !username ||
     !email ||
     !phone_number ||
@@ -115,32 +116,45 @@ const updateUser = asyncHandler(async (req, res) => {
     !password ||
     !profile 
   ) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "all fields are required" });
   }
 
   const user = await User.findById(id).exec();
 
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    return res.status(400).json({ message: "user not found" });
   }
 
-  // Update user fields
+  //checks dups
+  // const duplicate = await User.findOne({ username }).lean().exec();
+  // if (duplicate && duplicate?._id.toString() !== id) {
+  //   return res.status(409).json({ message: "duplicate username" });
+  // }
+
   user.username = username;
   user.email = email;
   user.phone_number = phone_number;
   user.address = address;
   user.fullname = fullname;
-  user.password = await bcrypt.hash(password, 10); // Always hash password on update
+  user.password = password;
   user.profile = profile;
   user.roles = roles;
 
-  const updatedUser = await user.save();
-  return res.json({ message: `Updated user ${updatedUser.username}` });
+  //testing later to see if it rehashes properly
+  if (password) {
+    user.password = await bcrypt.hash(password, 10);
+  }
+
+  if (Array.isArray(roles) || !roles.length) {
+    const updatedUser = await user.save();
+    return res.json({ message: `updated ${updatedUser.username}` });
+  }
 });
 
 const updateUserInformation = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  // Extract other user information from the request body
   const {
+    id,
     username,
     email,
     phone_number,
@@ -150,8 +164,9 @@ const updateUserInformation = asyncHandler(async (req, res) => {
     profile,
   } = req.body;
 
-  // Checks fields
+  //checks fields
   if (
+    !id ||
     !username ||
     !email ||
     !phone_number ||
@@ -161,16 +176,21 @@ const updateUserInformation = asyncHandler(async (req, res) => {
     !roles.length ||
     !profile 
   ) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "all fields are required" });
   }
 
   const user = await User.findById(id).exec();
 
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    return res.status(400).json({ message: "user not found" });
   }
 
-  // Update user fields
+  //checks dups
+  // const duplicate = await User.findOne({ username }).lean().exec();
+  // if (duplicate && duplicate?._id.toString() !== id) {
+  //   return res.status(409).json({ message: "duplicate username" });
+  // }
+
   user.username = username;
   user.email = email;
   user.phone_number = phone_number;
@@ -179,8 +199,10 @@ const updateUserInformation = asyncHandler(async (req, res) => {
   user.profile = profile;
   user.roles = roles;
 
-  const updatedUser = await user.save();
-  return res.json({ message: `Updated user ${updatedUser.username}` });
+  if (Array.isArray(roles) || !roles.length) {
+    const updatedUser = await user.save();
+    return res.json({ message: `updated ${updatedUser.username}` });
+  }
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
