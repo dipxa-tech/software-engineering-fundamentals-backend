@@ -16,64 +16,66 @@ const generateReceiptId = () => {
 
 // Create lifecycle record
 const createLifecycleRecord = asyncHandler(async (req, res) => {
-    const { assetId, userId, quantity, date, others } = req.body;
-  
-    try {
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "Customer not found" });
-      }
-  
-      const asset = await Asset.findById(assetId);
-      if (!asset) {
-        return res.status(404).json({ message: "Asset not found" });
-      }
-  
-      if (asset.amount < quantity) {
-        return res.status(400).json({ message: "Insufficient quantity of asset" });
-      }
-  
-      // Deduct quantity from asset quantity
-      asset.amount -= quantity;
-      await asset.save();
-  
-      const newReceipt = new Receipt({
-        receiptId: generateReceiptId(),
-        userId,
-        assetType: [asset.genre],
-        date,
-        quantity,
-        status: "Pending",
-        action: "Requested",
-        others,
-      });
-  
-      const savedReceipt = await newReceipt.save();
-  
-      const newLifecycle = new Lifecycle({
-        trackingId: generateTrackingId(),
-        product: asset.genre,
-        customer: userId,
-        date,
-        quantity,
-        status: "Pending",
-        action: "Requested",
-        others,
-        receipt: savedReceipt._id,  // Storing the receipt ID in the lifecycle record
-      });
-  
-      const savedLifecycle = await newLifecycle.save();
-  
-      // Push the receipt information to the user's receipts array
-      user.receipts.push(savedReceipt._id);
-      await user.save();
-  
-      res.status(201).json(savedLifecycle);
-    } catch (error) {
-      console.error("Error creating lifecycle record:", error);
-      res.status(500).json({ message: "Internal server error" });
+  const { assetId, userId, quantity, date, others } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Customer not found" });
     }
-  });
+
+    const asset = await Asset.findById(assetId);
+    if (!asset) {
+      return res.status(404).json({ message: "Asset not found" });
+    }
+
+    if (asset.amount < quantity) {
+      return res
+        .status(400)
+        .json({ message: "Insufficient quantity of asset" });
+    }
+
+    // Deduct quantity from asset quantity
+    asset.amount -= quantity;
+    await asset.save();
+
+    const newReceipt = new Receipt({
+      receiptId: generateReceiptId(),
+      userId,
+      assetType: [asset.genre],
+      date,
+      quantity,
+      status: "Pending",
+      action: "Requested",
+      others,
+    });
+
+    const savedReceipt = await newReceipt.save();
+
+    const newLifecycle = new Lifecycle({
+      trackingId: generateTrackingId(),
+      product: asset.genre,
+      customer: userId,
+      date,
+      quantity,
+      status: "Pending",
+      action: "Requested",
+      others,
+      receipt: savedReceipt._id, // Storing the receipt ID in the lifecycle record
+    });
+
+    const savedLifecycle = await newLifecycle.save();
+
+    // Push the receipt information to the user's receipts array
+    user.receipts.push(savedReceipt._id);
+    await user.save();
+
+    res.status(201).json(savedLifecycle);
+  } catch (error) {
+    console.error("Error creating lifecycle record:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 // Update lifecycle record status
 const updateLifecycleRecord = asyncHandler(async (req, res) => {
@@ -87,7 +89,7 @@ const updateLifecycleRecord = asyncHandler(async (req, res) => {
 
   lifecycleRecord.status = status;
   await lifecycleRecord.save();
-  
+
   // Update corresponding receipt status
   const receiptRecord = await Receipt.findById(lifecycleRecord.receipt);
   if (receiptRecord) {
@@ -119,7 +121,7 @@ const getLifecycleRecordById = asyncHandler(async (req, res) => {
 const getAllLifecycleRecords = asyncHandler(async (req, res) => {
   const lifecycleRecords = await Lifecycle.find().populate(
     "customer",
-    "username email",
+    "username email"
   );
   res.status(200).json(lifecycleRecords);
 });
@@ -134,12 +136,6 @@ const deleteLifecycleRecord = asyncHandler(async (req, res) => {
   }
 
   await lifecycleRecord.deleteOne();
-
-  // Delete corresponding receipt record if exists
-  const receiptRecord = await Receipt.findOne({ _id: lifecycleRecord._id });
-  if (receiptRecord) {
-    await receiptRecord.deleteOne();
-  }
 
   res.status(200).json({ message: `Lifecycle record deleted` });
 });
