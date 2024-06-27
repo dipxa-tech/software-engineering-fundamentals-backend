@@ -50,7 +50,8 @@ const createFeedback = asyncHandler(async (req, res) => {
 
 // Update a feedback
 const updateFeedback = asyncHandler(async (req, res) => {
-  const { id, username, message, email } = req.body;
+  const {id} = req.params
+  const { username, message, email } = req.body;
 
   if (!id || !username || !message || !email) {
     return res.status(400).json({ message: "All fields are required" });
@@ -71,13 +72,16 @@ const updateFeedback = asyncHandler(async (req, res) => {
 
 // Delete a feedback
 const deleteFeedback = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
+
+  console.log(id)
 
   if (!id) {
     return res.status(400).json({ message: "Feedback ID required" });
   }
 
   const feedback = await Feedback.findById(id).exec();
+  console.log(feedback)
   if (!feedback) {
     return res.status(400).json({ message: "Feedback not found" });
   }

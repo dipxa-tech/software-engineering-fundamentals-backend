@@ -1,20 +1,5 @@
 const mongoose = require("mongoose");
 
-const maintenanceHistorySchema = new mongoose.Schema({
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-  status: {
-    type: String,
-    default: "Under Maintenance",
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-});
-
 const assetSchema = new mongoose.Schema({
   genre: [
     {
@@ -33,7 +18,16 @@ const assetSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  history: [maintenanceHistorySchema], // Embedded schema for maintenance history
+  status: {
+    type: String,
+    enum: ["Available", "Maintenance"],
+    default: "Available",
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: 0, // Example: Ensure amount is non-negative
+  },
 });
 
 const Asset = mongoose.model("Asset", assetSchema);

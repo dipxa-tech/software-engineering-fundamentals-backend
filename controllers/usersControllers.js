@@ -130,7 +130,7 @@ const updateUser = asyncHandler(async (req, res) => {
   user.phone_number = phone_number;
   user.address = address;
   user.fullname = fullname;
-  user.password = await bcrypt.hash(password, 10); // Always hash password on update
+  user.password = await bcrypt.hash(password, 10);
   user.profile = profile;
   user.roles = roles;
 
@@ -184,7 +184,7 @@ const updateUserInformation = asyncHandler(async (req, res) => {
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
 
   if (!id) {
     return res.status(400).json({ message: "User ID required" });

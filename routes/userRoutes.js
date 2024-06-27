@@ -7,12 +7,12 @@ const userControllers = require('../controllers/usersControllers');
 
 router.route('/')
     .get(userControllers.getAllUsers)
+    .delete(userControllers.deleteUser);
 
 router.route('/:id')
     .get(userControllers.getUserById)
     .patch(userControllers.updateUser)
-    .delete(userControllers.deleteUser);
+    .patch(userControllers.updateUserInformation)
 
-router.patch('/update/:id', userControllers.updateUserInformation);
 
 module.exports = router;

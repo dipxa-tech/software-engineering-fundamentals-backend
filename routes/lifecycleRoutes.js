@@ -8,10 +8,10 @@ const lifecycleControllers = require('../controllers/lifecycleControllers')
 router.route('/')
     .get(lifecycleControllers.getAllLifecycleRecords)
     .post(lifecycleControllers.createLifecycleRecord)
+    .delete(lifecycleControllers.deleteLifecycleRecord);
 
 router.route('/:id')
-    .get(lifecycleControllers.getLifecycleRecord)
-    .patch(lifecycleControllers.updateLifecycleRecord)
-    .delete(lifecycleControllers.deleteLifecycleRecord)
+    .get(lifecycleControllers.getLifecycleRecordById)
+    .patch(lifecycleControllers.updateLifecycleRecord);
 
 module.exports = router

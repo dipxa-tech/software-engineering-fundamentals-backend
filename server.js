@@ -26,11 +26,13 @@ app.use(express.json());
 app.use("/", express.static(path.join(__dirname, "public")));
 
 app.use("/", require("./routes/root"));
-app.use('/auth', require('./routes/authRoutes'))
+app.use("/auth", require("./routes/authRoutes"));
 app.use("/createUser", require("./routes/userCreateRoutes"));
-app.use("/users", require("./routes/userRoutes"))
+app.use("/users", require("./routes/userRoutes"));
 app.use("/feedbacks", require("./routes/feedbackRoutes"));
 app.use("/assets", require("./routes/assetRoutes"));
+app.use("/receipts", require("./routes/receiptRoutes"));
+app.use("/lifecycles", require("./routes/lifecycleRoutes"));
 
 app.all("*", (req, res) => {
   res.status(404);

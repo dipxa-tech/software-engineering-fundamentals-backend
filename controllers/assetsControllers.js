@@ -9,6 +9,7 @@ const getAllAssets = asyncHandler(async (req, res) => {
     }
     return res.json(assets);
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 });
@@ -20,23 +21,27 @@ const getAssetById = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Asset ID required" });
   }
 
-  const asset = await Asset.findById(id).lean().exec();
-  if (!asset) {
-    return res.status(404).json({ message: "Asset not found" });
+  try {
+    const asset = await Asset.findById(id).lean().exec();
+    if (!asset) {
+      return res.status(404).json({ message: "Asset not found" });
+    }
+    return res.json(asset);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
-
-  return res.json(asset);
 });
 
 const createAsset = asyncHandler(async (req, res) => {
-  const { genre, date, description } = req.body;
+  const { genre, date, description, amount, status } = req.body;
 
-  if (!date || !genre || !description) {
+  if (!date || !genre || !description || !amount || !status) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    const assetObject = { date, genre, description };
+    const assetObject = { genre, date, description, amount, status };
     const newAsset = await Asset.create(assetObject);
 
     return res.status(201).json({ message: "New asset created" });
@@ -48,39 +53,51 @@ const createAsset = asyncHandler(async (req, res) => {
 
 const updateAsset = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { date, genre, description } = req.body;
+  const { genre, date, description, amount, status } = req.body;
 
-  if (!date || !genre || !description) {
+  if (!date || !genre || !description || !amount || !status) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const asset = await Asset.findById(id).exec();
-  if (!asset) {
-    return res.status(404).json({ message: "Asset not found" });
+  try {
+    const asset = await Asset.findById(id).exec();
+    if (!asset) {
+      return res.status(404).json({ message: "Asset not found" });
+    }
+
+    asset.genre = genre;
+    asset.date = date;
+    asset.description = description;
+    asset.amount = amount;
+    asset.status = status;
+
+    const updatedAsset = await asset.save();
+    return res.json({ message: `Updated asset ${updatedAsset.genre}` });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
-
-  asset.date = date;
-  asset.genre = genre;
-  asset.description = description;
-
-  const updatedAsset = await asset.save();
-  return res.json({ message: `Updated asset ${updatedAsset.genre}` });
 });
 
 const deleteAsset = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
 
   if (!id) {
     return res.status(400).json({ message: "Asset ID required" });
   }
 
-  const asset = await Asset.findById(id).exec();
-  if (!asset) {
-    return res.status(404).json({ message: "Asset not found" });
-  }
+  try {
+    const asset = await Asset.findById(id).exec();
+    if (!asset) {
+      return res.status(404).json({ message: "Asset not found" });
+    }
 
-  const result = await asset.deleteOne();
-  return res.json({ message: `Asset ${result.genre} has been deleted.` });
+    const result = await asset.deleteOne();
+    return res.json({ message: `Asset ${result.genre} has been deleted.` });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 module.exports = {

@@ -10,7 +10,7 @@ router.route('/')
     .post(maintenanceControllers.createMaintenanceRecord)
 
 router.route('/:id')
-    .get(maintenanceControllers.getMaintenanceRecord)
+    .get(maintenanceControllers.getMaintenanceRecordById)
     .patch(maintenanceControllers.updateMaintenanceRecord)
     .delete(maintenanceControllers.deleteMaintenanceRecord)
 

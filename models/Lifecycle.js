@@ -1,36 +1,51 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 
-const lifeCycle = new Schema({
+const lifeCycleSchema = new Schema({
   trackingId: {
     type: String,
-    default: uuidv4, // Automatically generate a UUID
-    unique: true
+    default: uuidv4,
+    unique: true,
+    required: true,
   },
   product: {
-    type: String,
-    required: true
+    type: Array,
+    required: true,
   },
   customer: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
   dateCreated: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
-  amountLoaned: {
+  quantity: {
     type: Number,
-    required: true
+    required: true,
   },
   status: {
     type: String,
     required: true,
-    enum: ['Pending', 'Approved', 'Rejected', 'Returned'], // Example statuses
-    default: 'Pending'
-  }
+    enum: ["Pending", "Delivered", "Rejected", "Returned"],
+    default: "Pending",
+  },
+  action: {
+    type: String,
+    required: true,
+  },
+  others: {
+    type: String,
+    required: true,
+  },
+  receipt: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Receipt" ,
+  },
 });
 
-module.exports = mongoose.model('Lifecycle', lifeCycle);
+const Lifecycle = mongoose.model("Lifecycle", lifeCycleSchema);
+
+module.exports = Lifecycle;

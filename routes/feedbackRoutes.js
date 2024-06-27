@@ -7,11 +7,11 @@ const feedbackControllers = require('../controllers/feedbacksControllers');
 
 router.route('/')
     .get(feedbackControllers.getAllFeedbacks)
-    .post(feedbackControllers.createFeedback);
+    .post(feedbackControllers.createFeedback)
+    .delete(feedbackControllers.deleteFeedback);
 
 router.route('/:id')
     .get(feedbackControllers.getFeedbackById)
-    .patch(feedbackControllers.updateFeedback)
-    .delete(feedbackControllers.deleteFeedback);
+    .patch(feedbackControllers.updateFeedback);
 
 module.exports = router;

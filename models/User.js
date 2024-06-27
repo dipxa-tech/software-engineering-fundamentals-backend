@@ -19,12 +19,12 @@ const userSchema = new mongoose.Schema({
   },
   phone_number: {
     type: String,
-    required: true
+    required: true,
   },
   roles: [
     {
       type: String,
-      default: "User", 
+      default: "User",
     },
   ],
   profile: {
@@ -32,8 +32,13 @@ const userSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    required: true
+    required: true,
   },
+  receipts: [
+    { type: mongoose.Schema.Types.ObjectId,
+      ref: "Receipt",
+    }
+  ],
 });
 
 module.exports = mongoose.model("User", userSchema);
