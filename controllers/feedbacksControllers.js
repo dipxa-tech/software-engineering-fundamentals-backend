@@ -74,14 +74,12 @@ const updateFeedback = asyncHandler(async (req, res) => {
 const deleteFeedback = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
-  console.log(id)
 
   if (!id) {
     return res.status(400).json({ message: "Feedback ID required" });
   }
 
   const feedback = await Feedback.findById(id).exec();
-  console.log(feedback)
   if (!feedback) {
     return res.status(400).json({ message: "Feedback not found" });
   }

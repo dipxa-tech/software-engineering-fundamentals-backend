@@ -1,31 +1,53 @@
-const asyncHandler = require('express-async-handler');
-const User = require('../models/User');
-const Receipt = require('../models/Receipt');
-const { v4: uuidv4 } = require('uuid');
+const asyncHandler = require("express-async-handler");
+const User = require("../models/User");
+const Receipt = require("../models/Receipt");
+const { v4: uuidv4 } = require("uuid");
 
 const generateReceiptId = () => uuidv4();
 
 const getAllReceipts = asyncHandler(async (req, res) => {
   try {
-    const receipts = await Receipt.find().populate('userId', 'username email').lean().exec();
+    const receipts = await Receipt.find()
+      .populate("userId", "username email")
+      .lean()
+      .exec();
     if (!receipts.length) {
-      return res.status(400).json({ message: 'No receipts found' });
+      return res.status(400).json({ message: "No receipts found" });
     }
     res.json(receipts);
   } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
 const getReceiptsByUserId = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const user = await User.findById(id).populate('receipts').exec();
+  const user = await User.findById(id)
+    .populate({
+      path: "receipts",
+      populate: { path: "userId" },
+    })
+    .lean()
+    .exec();
+
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: "User not found" });
   }
 
   res.json(user.receipts);
+});
+
+const getReceiptsById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const receipt = await Receipt.findById(id).populate("userId").exec();
+
+  if (!receipt) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.json(receipt);
 });
 
 const createReceipt = asyncHandler(async (req, res) => {
@@ -33,7 +55,7 @@ const createReceipt = asyncHandler(async (req, res) => {
 
   const user = await User.findById(userId);
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: "User not found" });
   }
 
   const receipt = new Receipt({
@@ -41,8 +63,8 @@ const createReceipt = asyncHandler(async (req, res) => {
     userId,
     assetType,
     quantity,
-    status: 'Pending',
-    action: 'Requested',
+    status: "Pending",
+    action: "Requested",
     others,
   });
 
@@ -59,12 +81,12 @@ const updateReceipt = asyncHandler(async (req, res) => {
   const { userId, assetType, date, quantity, status } = req.body;
 
   if (!id || !userId || !assetType || !date || !quantity || !status) {
-    return res.status(400).json({ message: 'All fields are required' });
+    return res.status(400).json({ message: "All fields are required" });
   }
 
   const receipt = await Receipt.findById(id).exec();
   if (!receipt) {
-    return res.status(404).json({ message: 'Receipt not found' });
+    return res.status(404).json({ message: "Receipt not found" });
   }
 
   receipt.userId = userId;
@@ -83,7 +105,7 @@ const deleteReceipt = asyncHandler(async (req, res) => {
 
   const receipt = await Receipt.findById(id).exec();
   if (!receipt) {
-    return res.status(404).json({ message: 'Receipt not found' });
+    return res.status(404).json({ message: "Receipt not found" });
   }
 
   await receipt.deleteOne();
@@ -97,4 +119,5 @@ module.exports = {
   createReceipt,
   updateReceipt,
   deleteReceipt,
+  getReceiptsById
 };

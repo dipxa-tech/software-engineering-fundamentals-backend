@@ -11,7 +11,11 @@ router.route('/')
   .delete(receiptControllers.deleteReceipt);
 
 router.route('/:id')
-  .get(receiptControllers.getReceiptsByUserId)
-  .patch(receiptControllers.updateReceipt);
+.get(receiptControllers.getReceiptsByUserId)
+.patch(receiptControllers.updateReceipt);
+
+router.route('/specific/:id')
+  .get(receiptControllers.getReceiptsById)
+
 
 module.exports = router;
